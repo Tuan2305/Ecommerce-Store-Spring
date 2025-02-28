@@ -6,15 +6,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
 
-@Entity
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
-@EqualsAndHashCode
+@AllArgsConstructor
 public class BusinessDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private String businessName;
+    private String businessEmail;
+    private String businessMobile;
+    private String businessAddress;
+    private String logo;
+    private String banner;
 
 }

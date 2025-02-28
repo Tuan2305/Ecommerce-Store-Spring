@@ -1,5 +1,7 @@
 package com.tuanvn.Ecommerce.Store.modal;
 
+import com.tuanvn.Ecommerce.Store.domain.HomeCategorySection;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,18 +14,13 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Address {
+public class HomeCategory<section> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String name;
-
-    private String address;
-
-    private String city;
-
-    private String mobile;
-
-
+    private String image;
+    private String categoryId;
+    private HomeCategorySection section;
 }
