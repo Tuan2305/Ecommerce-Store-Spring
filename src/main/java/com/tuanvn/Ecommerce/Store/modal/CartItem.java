@@ -18,10 +18,11 @@ public class CartItem {
 
     private Long id;
 
+    @ManyToOne// Liên kết với bảng Cart
     @JsonIgnore
-    @ManyToMany
     private Cart cart;
 
+    @ManyToOne// Liên kết với bảng Product
     private Product product;
 
     private String size;

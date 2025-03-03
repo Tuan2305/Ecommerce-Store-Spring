@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HomeController {
-    @GetMapping
+    @GetMapping("/ecommerceshop")
     public ApiResponse HomeControllerHandler(){
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setMessage("hello world");
