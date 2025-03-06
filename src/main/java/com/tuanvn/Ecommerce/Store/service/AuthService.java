@@ -1,5 +1,10 @@
 package com.tuanvn.Ecommerce.Store.service;
 
 
-public class AuthService {
+import com.tuanvn.Ecommerce.Store.response.SignupRequest;
+
+public interface AuthService {
+
+    String createUser(SignupRequest req);
+
 }
