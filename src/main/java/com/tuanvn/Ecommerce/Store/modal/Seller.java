@@ -8,7 +8,9 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity // danh dau la 1 bang trong batabase
-
+@Getter
+@Setter
+@Table(name = "seller")
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode // Tạo phương thức equals() và hashCode(), giúp so sánh các đối tượng Seller.

@@ -75,7 +75,7 @@ public class SellerServiceImpl implements SellerService {
         if(seller == null){
             throw new Exception("seller not found ");
         }
-        return null;
+        return seller;
     }
 
     @Override

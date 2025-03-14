@@ -41,7 +41,6 @@ public class CustomUserServiceImpl implements UserDetailsService {
             if(seller != null){
                 return buildUserDetails(seller.getEmail(), seller.getPassword(), seller.getRole());
             }
-
         }else {
             User user = userRepository.findByEmail(username);
             if (user != null) {
