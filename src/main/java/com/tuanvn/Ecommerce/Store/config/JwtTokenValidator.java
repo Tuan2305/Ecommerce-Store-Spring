@@ -47,8 +47,9 @@ public class JwtTokenValidator extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-            catch (Exception e){
-                throw new BadCredentialsException("Invalid JWT token");
+            catch (Exception e) {
+                e.printStackTrace(); // Debug lỗi thật sự
+                throw new BadCredentialsException("Invalid JWT token: " + e.getMessage());
 
             }
 

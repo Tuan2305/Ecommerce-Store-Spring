@@ -1,6 +1,7 @@
 package com.tuanvn.Ecommerce.Store.controller;
 
 import com.tuanvn.Ecommerce.Store.domain.AccountStatus;
+import com.tuanvn.Ecommerce.Store.exceptions.SellerException;
 import com.tuanvn.Ecommerce.Store.modal.Seller;
 import com.tuanvn.Ecommerce.Store.modal.VerificationCode;
 import com.tuanvn.Ecommerce.Store.repository.VerificationCodeRepository;
@@ -95,7 +96,7 @@ public class SellerController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<Seller> getSellerById(@PathVariable Long id) throws Exception{
+    public ResponseEntity<Seller> getSellerById(@PathVariable Long id) throws SellerException {
         Seller seller = sellerService.getSellerById(id);
         return new ResponseEntity<>(seller, HttpStatus.OK);
     }

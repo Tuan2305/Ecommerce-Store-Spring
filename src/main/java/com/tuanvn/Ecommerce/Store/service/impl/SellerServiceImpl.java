@@ -3,6 +3,7 @@ package com.tuanvn.Ecommerce.Store.service.impl;
 import com.tuanvn.Ecommerce.Store.config.JwtProvider;
 import com.tuanvn.Ecommerce.Store.domain.AccountStatus;
 import com.tuanvn.Ecommerce.Store.domain.USER_ROLE;
+import com.tuanvn.Ecommerce.Store.exceptions.SellerException;
 import com.tuanvn.Ecommerce.Store.modal.Address;
 import com.tuanvn.Ecommerce.Store.modal.Seller;
 import com.tuanvn.Ecommerce.Store.repository.AddressRepository;
@@ -63,9 +64,9 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public Seller getSellerById(Long id) throws Exception {
+    public Seller getSellerById(Long id) throws SellerException {
         return sellerRepository.findById(id)
-                .orElseThrow(() -> new Exception("seller not found with id " +id));
+                .orElseThrow(() -> new SellerException("seller not found with id " +id));
     }
 
     @Override
