@@ -10,7 +10,7 @@ import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+
 public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

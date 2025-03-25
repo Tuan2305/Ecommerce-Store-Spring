@@ -61,13 +61,8 @@ public class CartItem {
         this.quantity = quantity;
     }
 
-    public Integer getPrice() {
-        return Price;
-    }
 
-    public void setPrice(Integer price) {
-        Price = price;
-    }
+
 
     public Long getUserId() {
         return userId;
@@ -92,9 +87,19 @@ public class CartItem {
 
     private int quantity = 1;
 
-    private Integer Price;
+    private Integer price ; // Giong nhw mrpPrice
 
-    private Integer sellingPrice;
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+
+        this.price = price;
+
+    }
+
+    private Integer sellingPrice ;
 
     private Long userId;
 
