@@ -1,4 +1,4 @@
-package com.tuanvn.Ecommerce.Store.modal;
+package com.tuanvn.Ecommerce.Store.domain;
 
 public enum OrderStatus {
     PENDING,

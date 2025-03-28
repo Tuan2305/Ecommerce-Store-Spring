@@ -3,6 +3,7 @@ package com.tuanvn.Ecommerce.Store.controller;
 import com.tuanvn.Ecommerce.Store.domain.AccountStatus;
 import com.tuanvn.Ecommerce.Store.exceptions.SellerException;
 import com.tuanvn.Ecommerce.Store.modal.Seller;
+import com.tuanvn.Ecommerce.Store.modal.SellerReport;
 import com.tuanvn.Ecommerce.Store.modal.VerificationCode;
 import com.tuanvn.Ecommerce.Store.repository.VerificationCodeRepository;
 import com.tuanvn.Ecommerce.Store.request.LoginOtpRequest;
@@ -11,6 +12,7 @@ import com.tuanvn.Ecommerce.Store.response.ApiResponse;
 import com.tuanvn.Ecommerce.Store.response.AuthResponse;
 import com.tuanvn.Ecommerce.Store.service.AuthService;
 import com.tuanvn.Ecommerce.Store.service.EmailService;
+import com.tuanvn.Ecommerce.Store.service.SellerReportService;
 import com.tuanvn.Ecommerce.Store.service.SellerService;
 import com.tuanvn.Ecommerce.Store.utils.OtpUtil;
 
@@ -32,12 +34,14 @@ public class SellerController {
     private final VerificationCodeRepository verificationCodeRepository;
     private final AuthService authService;
     private final EmailService emailService;
+    private final SellerReportService sellerReportService;
 
-    public SellerController(SellerService sellerService, VerificationCodeRepository verificationCodeRepository, AuthService authService, EmailService emailService) {
+    public SellerController(SellerService sellerService, VerificationCodeRepository verificationCodeRepository, AuthService authService, EmailService emailService, SellerReportService sellerReportService) {
         this.sellerService = sellerService;
         this.verificationCodeRepository = verificationCodeRepository;
         this.authService = authService;
         this.emailService = emailService;
+        this.sellerReportService = sellerReportService;
     }
 
     @PostMapping("/login")
@@ -110,14 +114,14 @@ public class SellerController {
         return new ResponseEntity<>(seller, HttpStatus.OK);
     }
 
-//    @GetMapping("/report")
-//    public ResponseEntity<SellerReport> getSellerReport(
-//            @RequestHeader("Authorization") String jwt) throws SellerException {
+    @GetMapping("/report")
+    public ResponseEntity<SellerReport> getSellerReport(
+            @RequestHeader("Authorization") String jwt) throws Exception {
 //        String email = jwtProvider.getEmailFromJwtToken(jwt);
-//        Seller seller = sellerService.getSellerByEmail(email);
-//        SellerReport report = sellerReportService.getSellerReport(seller);
-//        return new ResponseEntity<>(report, HttpStatus.OK);
-//    }
+        Seller seller = sellerService.getSellerProfile(jwt);
+        SellerReport report = sellerReportService.getSellerReport(seller);
+        return new ResponseEntity<>(report, HttpStatus.OK);
+    }
 
     @GetMapping
     public ResponseEntity<List<Seller>> getAllSellers(
