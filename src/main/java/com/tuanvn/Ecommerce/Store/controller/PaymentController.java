@@ -1,7 +1,7 @@
 package com.tuanvn.Ecommerce.Store.controller;
 
 import com.tuanvn.Ecommerce.Store.modal.PaymentOrder;
-import com.tuanvn.Ecommerce.Store.service.PaymentService;
+import com.tuanvn.Ecommerce.Store.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +13,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/payment")
 public class PaymentController {
     private final PaymentService paymentService;
+    private final UserService userService;
+    private final SellerService sellerService;
+    private final OrderService orderService;
+    private final SellerReportService sellerReportService;
+    private final TransactionService transactionService;
 
-    public PaymentController(PaymentService paymentService) {
+
+    public PaymentController(PaymentService paymentService, UserService userService, SellerService sellerService, OrderService orderService, SellerReportService sellerReportService, TransactionService transactionService) {
         this.paymentService = paymentService;
+        this.userService = userService;
+        this.sellerService = sellerService;
+        this.orderService = orderService;
+        this.sellerReportService = sellerReportService;
+        this.transactionService = transactionService;
     }
 
     /**
