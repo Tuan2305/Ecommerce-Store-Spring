@@ -18,7 +18,33 @@ public class Deal {
 
     private Integer discount;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Integer discount) {
+        this.discount = discount;
+    }
+
+    public HomeCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(HomeCategory category) {
+        this.category = category;
+    }
+
     @OneToOne
     private HomeCategory category;
 
+    public Deal(Object o, int i, HomeCategory category) {
+    }
 }
