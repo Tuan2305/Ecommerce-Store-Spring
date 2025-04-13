@@ -59,7 +59,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public void deleteReview(Long reviewId, Long userId) throws Exception {
         Review review = getReviewById(reviewId);
-        if(review.getUser().getId().equals(userId)){
+        if(!review.getUser().getId().equals(userId)){
             throw new Exception("you can't delete this review");
         }
         reviewRepository.delete(review);
