@@ -134,10 +134,18 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtProvider.generateToken(authentication);
+        User user = userRepository.findByEmail(username);
+        if (user == null) {
+            throw new Exception("User not found");
+        }
 
         AuthResponse authResponse= new AuthResponse();
         authResponse.setJwt(token);
         authResponse.setMessage("Login success");
+
+        authResponse.setId(user.getId()); // Thiết lập ID từ User
+        authResponse.setEmail(user.getEmail()); // Thiết lập email từ User
+        authResponse.setFullName(user.getFullName()); // Thiết lập tên đầy đủ từ User
         Collection<?extends GrantedAuthority> authorities = authentication.getAuthorities();
         String roleName = authorities.isEmpty()?null:authorities.iterator().next().getAuthority();
 

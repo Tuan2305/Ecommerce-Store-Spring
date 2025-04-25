@@ -36,7 +36,7 @@ public class OrderController {
     public ResponseEntity<PaymentLinkResponse> createOrderHandler(
 
             @RequestBody Address spippingAddress,
-            @RequestParam PaymentMethod paymentMethod,
+            @RequestParam(name = "paymentMethod", required = false, defaultValue = "VNPAY") PaymentMethod paymentMethod,
             @RequestHeader("Authorization") String jwt)
             throws Exception {
 

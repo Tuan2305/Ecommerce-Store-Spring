@@ -37,23 +37,16 @@ public class AppConfig {
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
-        return new CorsConfigurationSource() {
-            @Override
-            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-
-                CorsConfiguration cfg = new CorsConfiguration();
-                cfg.setAllowedOrigins(Collections.singletonList("*"));
-                cfg.setAllowedMethods(Collections.singletonList("*"));
-                cfg.setAllowedHeaders(Collections.singletonList("*"));
-                cfg.setAllowCredentials(true);
-                cfg.setExposedHeaders(Collections.singletonList("Authorization"));
-                cfg.setMaxAge(3600l);
-
-                return cfg;
-            }
+        return request -> {
+            CorsConfiguration cfg = new CorsConfiguration();
+            cfg.setAllowedOrigins(Collections.singletonList("http://localhost:3000")); // Allow frontend on port 3000
+            cfg.setAllowedMethods(Collections.singletonList("*")); // Allow all HTTP methods
+            cfg.setAllowedHeaders(Collections.singletonList("*")); // Allow all headers
+            cfg.setAllowCredentials(true); // Allow credentials (e.g., cookies, authorization headers)
+            cfg.setExposedHeaders(Collections.singletonList("Authorization")); // Expose Authorization header
+            cfg.setMaxAge(3600L); // Cache preflight response for 1 hour
+            return cfg;
         };
-
-    //    return null;
     }
 
     @Bean

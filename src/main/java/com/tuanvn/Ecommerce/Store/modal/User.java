@@ -6,7 +6,9 @@ import com.tuanvn.Ecommerce.Store.domain.USER_ROLE;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -29,6 +31,24 @@ public class User {
     private String fullName;
 
     private String mobile;
+    private String gender;
+    private String birthday;
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
 
     private USER_ROLE role = USER_ROLE.ROLE_CUSTOMER;
 
@@ -102,4 +122,6 @@ public class User {
     public void setUsedCoupons(Set<Coupon> usedCoupons) {
         this.usedCoupons = usedCoupons;
     }
+
+
 }

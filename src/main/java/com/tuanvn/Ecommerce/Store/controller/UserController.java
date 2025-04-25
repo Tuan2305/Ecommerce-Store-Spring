@@ -9,7 +9,7 @@ import com.tuanvn.Ecommerce.Store.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.tuanvn.Ecommerce.Store.request.UpdateProfileRequest;
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -29,5 +29,13 @@ public class UserController {
 
         return ResponseEntity.ok(user);
 
+    }
+    @PutMapping("/users/profile")
+    public ResponseEntity<User> updateUserProfile(
+            @RequestHeader("Authorization") String jwt,
+            @RequestBody UpdateProfileRequest req
+    ) throws Exception {
+        User updatedUser = userService.updateProfile(jwt, req);
+        return ResponseEntity.ok(updatedUser);
     }
 }
