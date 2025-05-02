@@ -3,6 +3,7 @@ package com.tuanvn.Ecommerce.Store.controller;
 
 import com.tuanvn.Ecommerce.Store.domain.PaymentMethod;
 import com.tuanvn.Ecommerce.Store.modal.*;
+import com.tuanvn.Ecommerce.Store.response.PayOSPaymentResponse;
 import com.tuanvn.Ecommerce.Store.response.PaymentLinkResponse;
 import com.tuanvn.Ecommerce.Store.service.*;
 import lombok.RequiredArgsConstructor;
@@ -23,47 +24,40 @@ public class OrderController {
     private final CartService cartService;
     private final SellerService sellerService;
     private final SellerReportService sellerReportService;
-
-    public OrderController(OrderService orderService, UserService userService, CartService cartService, SellerService sellerService, SellerReportService sellerReportService) {
+    private final PaymentService paymentService;
+    public OrderController(OrderService orderService, UserService userService, CartService cartService, SellerService sellerService, SellerReportService sellerReportService, PaymentService paymentService) {
         this.orderService = orderService;
         this.userService = userService;
         this.cartService = cartService;
         this.sellerService = sellerService;
         this.sellerReportService = sellerReportService;
+        this.paymentService = paymentService;
     }
 
     @PostMapping()
     public ResponseEntity<PaymentLinkResponse> createOrderHandler(
-
-            @RequestBody Address spippingAddress,
-            @RequestParam(name = "paymentMethod", required = false, defaultValue = "VNPAY") PaymentMethod paymentMethod,
-            @RequestHeader("Authorization") String jwt)
-            throws Exception {
+            @RequestBody Address shippingAddress,
+            @RequestParam(name = "paymentMethod", required = false, defaultValue = "PAYOS") PaymentMethod paymentMethod,
+            @RequestHeader("Authorization") String jwt) throws Exception {
 
         User user = userService.findUserByJwtToken(jwt);
-        Cart cart=cartService.findUserCart(user);
-        Set<Order> orders =orderService.createOrder (user, spippingAddress, cart);
+        Cart cart = cartService.findUserCart(user);
+        Set<Order> orders = orderService.createOrder(user, shippingAddress, cart);
 
-//        PaymentOrder paymentOrder=paymentService.createOrder (user, orders);
+
+        PaymentOrder paymentOrder = paymentService.createOrder(user, orders);
         PaymentLinkResponse res = new PaymentLinkResponse();
-//
-//        if(paymentMethod.equals(PaymentMethod.RAZORPAY)){
-//            PaymentLink payment=paymentService.createRazorpayPaymentLink(user,
-//                    paymentOrder.getAmount(),
-//                    paymentOrder.getId());
-//            String paymentUrl=payment.get("short_url");
-//            String paymentUrlId=payment.get("id");
-//            res.setPayment_link_url (paymentUrl);
-//            res.setPayment_link_id(paymentUrlId);
-//            paymentOrder.setPaymentLinkId (paymentUrlId);
-//            paymentOrderRepository.save(paymentOrder);
-//        }
-//        else{
-//            String paymentUrl = paymentService
-//        }
-            return new ResponseEntity<>(res, HttpStatus.OK);
+
+        if (paymentMethod.equals(PaymentMethod.PAYOS)) {
+            PayOSPaymentResponse payOSResponse = paymentService.createPayOSPaymentLink(
+                    user, paymentOrder.getAmount(), paymentOrder.getId());
+
+            res.setPayment_link_url(payOSResponse.getData().getPaymentUrl());
+            res.setPayment_link_id(String.valueOf(payOSResponse.getData().getPaymentLinkId()));
         }
 
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
     @GetMapping("/user")
     public ResponseEntity<List<Order>> usersOrderHistoryHandler(
             @RequestHeader("Authorization")
@@ -105,5 +99,6 @@ public class OrderController {
 //        sellerReportService.updateSellerReport (report);
         return ResponseEntity.ok(order);
     }
+
 
 }

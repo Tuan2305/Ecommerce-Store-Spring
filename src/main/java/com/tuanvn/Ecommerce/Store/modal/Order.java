@@ -165,7 +165,7 @@ public class Order {
     private OrderStatus orderStatus;
 
     private int totalItem;
-
+    @Column(name = "order_payment_status")
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     private LocalDateTime orderDate = LocalDateTime.now();
