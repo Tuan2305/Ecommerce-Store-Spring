@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 
-public class ProductServiceImpl implements com.tuanvn.Ecommerce.Store.service.ProductService {
+public class    ProductServiceImpl implements com.tuanvn.Ecommerce.Store.service.ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;

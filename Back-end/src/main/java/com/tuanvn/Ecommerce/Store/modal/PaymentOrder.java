@@ -11,7 +11,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@AllArgsConstructorproceedPaymentOrder
+
 @NoArgsConstructor
 @EqualsAndHashCode
 public class PaymentOrder {
