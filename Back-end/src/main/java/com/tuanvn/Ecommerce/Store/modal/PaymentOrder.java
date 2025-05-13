@@ -11,11 +11,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-<<<<<<< HEAD
-@AllArgsConstructorproceedPaymentOrder
-=======
 
->>>>>>> 668572d (update sellerr)
 @NoArgsConstructor
 @EqualsAndHashCode
 public class PaymentOrder {
