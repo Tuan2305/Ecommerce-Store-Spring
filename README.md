@@ -1,3 +1,5 @@
+# Ecommerce Store frontend: https://github.com/Tuan2305/Ecommerce-Frontend
+
 # Ecommerce Store
 
 Ecommerce Store is a full-stack e-commerce web application built with Java Spring Boot. The project provides features such as cart management, order placement, payment processing, user management, and seller management.
