@@ -26,6 +26,7 @@ import java.util.List;
 
 public class    ProductServiceImpl implements com.tuanvn.Ecommerce.Store.service.ProductService {
 
+
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
@@ -153,17 +154,19 @@ public class    ProductServiceImpl implements com.tuanvn.Ecommerce.Store.service
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
         Pageable pageable;
-        if (sort != null && !sort.isEmpty()) {
+        if(sort != null && !sort.isEmpty()){
             pageable = switch (sort) {
-                case "price_low" -> PageRequest.of(pageNumber != null ? pageNumber : 0, Integer.MAX_VALUE,
+                case "price_low" -> PageRequest.of(pageNumber != null ? pageNumber : 0, 10,
                         Sort.by("sellingPrice").ascending());
-                case "price_high" -> PageRequest.of(pageNumber != null ? pageNumber : 0, Integer.MAX_VALUE,
+                case "price_high" -> PageRequest.of(pageNumber != null ? pageNumber : 0, 10,
                         Sort.by("sellingPrice").descending());
-                default -> PageRequest.of(pageNumber != null ? pageNumber : 0, Integer.MAX_VALUE,
+                default -> PageRequest.of(pageNumber != null ? pageNumber : 0, 10,
                         Sort.unsorted());
             };
-        } else {
-            pageable = PageRequest.of(pageNumber != null ? pageNumber : 0, Integer.MAX_VALUE, Sort.unsorted());
+        }
+        else{
+            pageable = PageRequest.of(pageNumber!= null ? pageNumber:0,10,Sort.unsorted());
+
         }
 
         return productRepository.findAll(spec,pageable);

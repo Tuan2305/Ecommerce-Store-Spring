@@ -125,49 +125,50 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse signing(LoginRequest req) throws Exception {
-        String username = req.getEmail();
-        String otp = req.getOtp();
+public AuthResponse signing(LoginRequest req) throws Exception {
+    String username = req.getEmail();
+    String otp = req.getOtp();
 
-        Authentication authentication = authenticate(username, otp);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    Authentication authentication = authenticate(username, otp);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token = jwtProvider.generateToken(authentication);
-        
-        AuthResponse authResponse = new AuthResponse();
-        authResponse.setJwt(token);
-        authResponse.setMessage("Login success");
+    String token = jwtProvider.generateToken(authentication);
+    
+    AuthResponse authResponse = new AuthResponse();
+    authResponse.setJwt(token);
+    authResponse.setMessage("Login success");
 
-        String SELLER_PREFIX = "seller_";
-        
-        // Kiểm tra xem đây là đăng nhập của người bán hay người dùng thông thường
-        if (username.startsWith(SELLER_PREFIX)) {
-            // Xử lý cho người bán
-            String sellerEmail = username.substring(SELLER_PREFIX.length());
-            Seller seller = sellerRepository.findByEmail(sellerEmail);
-            if (seller == null) {
-                throw new Exception("Người bán không tồn tại");
-            }
-            authResponse.setId(seller.getId());
-            authResponse.setEmail(seller.getEmail());
-            authResponse.setFullName(seller.getSellerName()); // Giả sử có phương thức getSellerName()
-        } else {
-            // Xử lý cho người dùng thông thường
-            User user = userRepository.findByEmail(username);
-            if (user == null) {
-                throw new Exception("Người dùng không tồn tại");
-            }
-            authResponse.setId(user.getId());
-            authResponse.setEmail(user.getEmail());
-            authResponse.setFullName(user.getFullName());
+    String SELLER_PREFIX = "seller_";
+    
+    // Kiểm tra xem đây là đăng nhập của người bán hay người dùng thông thường
+    if (username.startsWith(SELLER_PREFIX)) {
+        // Xử lý cho người bán
+        String sellerEmail = username.substring(SELLER_PREFIX.length());
+        Seller seller = sellerRepository.findByEmail(sellerEmail);
+        if (seller == null) {
+            throw new Exception("Người bán không tồn tại");
         }
+        authResponse.setId(seller.getId());
+        authResponse.setEmail(seller.getEmail());
+        authResponse.setFullName(seller.getSellerName()); // Hoặc phương thức tương ứng
+    } else {
+        // Xử lý cho người dùng thông thường
+        User user = userRepository.findByEmail(username);
+        if (user == null) {
+            throw new Exception("Người dùng không tồn tại");
+        }
+        authResponse.setId(user.getId());
+        authResponse.setEmail(user.getEmail());
+        authResponse.setFullName(user.getFullName());
+    }
 
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        String roleName = authorities.isEmpty() ? null : authorities.iterator().next().getAuthority();
-        authResponse.setRole(USER_ROLE.valueOf(roleName));
-        
-        return authResponse;
+    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+    String roleName = authorities.isEmpty() ? null : authorities.iterator().next().getAuthority();
+    authResponse.setRole(USER_ROLE.valueOf(roleName));
+    
+    return authResponse;
 }
+
 
     private Authentication authenticate(String username, String otp) throws Exception {
 
