@@ -25,6 +25,8 @@ This project includes the following key features:
   - JWT-based authentication and authorization.
 
 ## Project Structure
+
+<pre>
 Ecommerce-Store/
 ├── src/
 │   ├── main/
@@ -33,7 +35,7 @@ Ecommerce-Store/
 │   │   │       └── tuanvn/
 │   │   │           └── Ecommerce/
 │   │   │               ├── EcommerceStoreApplication.java # Main application entry point
-│   │   │               ├── config/        # Configuration files (e.g., security, application settings)
+│   │   │               ├── config/        # Configuration files
 │   │   │               ├── controller/    # API controllers
 │   │   │               ├── domain/        # Core domain models
 │   │   │               ├── exceptions/    # Custom exception handling
@@ -45,11 +47,12 @@ Ecommerce-Store/
 │   │   │               └── utils/         # Utility classes
 │   └── resources/
 │       ├── application.properties # Application configuration
-│       ├── static/                # Static resources (e.g., CSS, JS, images)
-│       └── templates/             # HTML templates (if any)
+│       ├── static/                # Static resources
+│       └── templates/             # HTML templates
 ├── test/                          # Test cases
 ├── pom.xml                        # Maven configuration file
 └── README.md                      # Project documentation
+</pre>
 
 ## System Requirements
 
@@ -87,3 +90,27 @@ Key endpoints:
 /auth: For registration and login.
 /api/orders: For order management.
 /api/transactions: For transaction management.
+
+## Cấu hình ứng dụng
+
+1. Tạo file `src/main/resources/application.properties` dựa theo file `application-template.properties`
+2. Cấu hình các biến môi trường sau:
+
+```bash
+# Database
+DB_URL=jdbc:mysql://localhost:3306/your_database
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+
+# Email
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_app_password
+
+# PayOS
+PAYOS_CLIENT_ID=your_payos_client_id
+PAYOS_API_KEY=your_payos_api_key
+PAYOS_CHECKSUM_KEY=your_payos_checksum_key
+
+# Stripe
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_PUBLIC_KEY=your_stripe_public_key
