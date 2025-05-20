@@ -1,27 +1,48 @@
 package com.tuanvn.Ecommerce.Store.service.impl;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+
+import com.tuanvn.Ecommerce.Store.request.StripeChargeRequest;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuanvn.Ecommerce.Store.config.PayOSConfig;
 import com.tuanvn.Ecommerce.Store.domain.PaymentMethod;
 import com.tuanvn.Ecommerce.Store.domain.PaymentOrderStatus;
 import com.tuanvn.Ecommerce.Store.domain.PaymentStatus;
-import com.tuanvn.Ecommerce.Store.request.PayOSPaymentRequest;
-import com.tuanvn.Ecommerce.Store.response.PayOSPaymentResponse;
 import com.tuanvn.Ecommerce.Store.modal.Order;
 import com.tuanvn.Ecommerce.Store.modal.PaymentOrder;
 import com.tuanvn.Ecommerce.Store.modal.User;
 import com.tuanvn.Ecommerce.Store.repository.OrderRepository;
 import com.tuanvn.Ecommerce.Store.repository.PaymentOrderRepository;
+import com.tuanvn.Ecommerce.Store.request.PayOSPaymentRequest;
+import com.tuanvn.Ecommerce.Store.response.PayOSPaymentResponse;
 import com.tuanvn.Ecommerce.Store.service.PaymentService;
 import com.tuanvn.Ecommerce.Store.utils.PayOSUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import java.util.HashMap;
+// import javax.annotation.PostConstruct;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Charge;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.checkout.SessionCreateParams;
+import com.tuanvn.Ecommerce.Store.config.StripeConfig;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -40,9 +61,16 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private StripeConfig stripeConfig;
+
+    @PostConstruct
+    public void initStripe() {
+        Stripe.apiKey = stripeConfig.getSecretKey();
+    }
 
     @Override
-    public PaymentOrder createOrder(User user, Set<Order> orders) {
+    public PaymentOrder createOrder(User user, Set<Order> orders, PaymentMethod paymentMethod) {
         System.out.println("Creating payment order...");
         PaymentOrder paymentOrder = new PaymentOrder();
         paymentOrder.setUser(user);
@@ -56,11 +84,16 @@ public class PaymentServiceImpl implements PaymentService {
         }
         paymentOrder.setAmount((long) totalAmount);
 
-        // Set default payment method
-        paymentOrder.setPaymentMethod(PaymentMethod.PAYOS);
+        // Use the provided payment method or default to STRIPE
+        paymentOrder.setPaymentMethod(paymentMethod != null ? paymentMethod : PaymentMethod.STRIPE);
 
         return paymentOrderRepository.save(paymentOrder);
     }
+
+//    @Override
+//    public PaymentOrder createOrder(User user, Set<Order> orders) {
+//        return null;
+//    }
 
     @Override
     public PaymentOrder getPaymentOrderById(String orderId) {
@@ -225,6 +258,73 @@ public class PaymentServiceImpl implements PaymentService {
         } else {
             System.out.println("Unhandled payment status: " + status);
             return false;
+        }
+    }
+
+    @Override
+    public String createStripeCheckoutSession(User user, Long amount, Long orderId) throws Exception {
+        String successUrl = stripeConfig.getAppBaseUrl() + "/payment/stripe-success?orderId=" + orderId;
+        String cancelUrl = stripeConfig.getAppBaseUrl() + "/payment/stripe-cancel?orderId=" + orderId;
+
+        try {
+            SessionCreateParams params = SessionCreateParams.builder()
+                    .setMode(SessionCreateParams.Mode.PAYMENT)
+                    .setSuccessUrl(successUrl)
+                    .setCancelUrl(cancelUrl)
+                    .addLineItem(SessionCreateParams.LineItem.builder()
+                            .setQuantity(1L)
+                            .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
+                                    .setCurrency("VND")
+                                    .setUnitAmount(amount)
+                                    .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                            .setName("Order #" + orderId)
+                                            .setDescription("Payment for order #" + orderId)
+                                            .build())
+                                    .build())
+                            .build())
+                    .build();
+
+            Session session = Session.create(params);
+
+            // Update payment order with session ID
+            Optional<PaymentOrder> optionalPaymentOrder = paymentOrderRepository.findById(orderId);
+            if (optionalPaymentOrder.isPresent()) {
+                PaymentOrder paymentOrder = optionalPaymentOrder.get();
+                paymentOrder.setPaymentLinkId(session.getId());
+                paymentOrderRepository.save(paymentOrder);
+            }
+
+            return session.getUrl();
+        } catch (StripeException e) {
+            throw new Exception("Error creating Stripe checkout session: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Charge createStripeCharge(StripeChargeRequest chargeRequest) throws StripeException {
+        Map<String, Object> chargeParams = new HashMap<>();
+        chargeParams.put("amount", chargeRequest.getAmount());
+        chargeParams.put("currency", chargeRequest.getCurrency());
+        chargeParams.put("description", chargeRequest.getDescription());
+        chargeParams.put("source", chargeRequest.getStripeToken());
+
+        return Charge.create(chargeParams);
+    }
+
+    @Override
+    public Session retrieveSession(String sessionId) throws StripeException {
+        return Session.retrieve(sessionId);
+    }
+
+    @Override
+    public boolean handleStripeWebhook(String payload, String sigHeader) throws Exception {
+        // Simple implementation
+        try {
+            // In a real implementation, you would verify the webhook signature
+            // and process the payment event
+            return true;
+        } catch (Exception e) {
+            throw new Exception("Error processing webhook: " + e.getMessage());
         }
     }
 }

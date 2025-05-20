@@ -35,29 +35,31 @@ public class OrderController {
     }
 
     @PostMapping()
-    public ResponseEntity<PaymentLinkResponse> createOrderHandler(
-            @RequestBody Address shippingAddress,
-            @RequestParam(name = "paymentMethod", required = false, defaultValue = "PAYOS") PaymentMethod paymentMethod,
-            @RequestHeader("Authorization") String jwt) throws Exception {
+public ResponseEntity<PaymentLinkResponse> createOrderHandler(
+        @RequestBody Address shippingAddress,
+        @RequestParam(name = "paymentMethod", required = false, defaultValue = "STRIPE") PaymentMethod paymentMethod,
+        @RequestHeader("Authorization") String jwt) throws Exception {
 
-        User user = userService.findUserByJwtToken(jwt);
-        Cart cart = cartService.findUserCart(user);
-        Set<Order> orders = orderService.createOrder(user, shippingAddress, cart);
-
-
-        PaymentOrder paymentOrder = paymentService.createOrder(user, orders);
-        PaymentLinkResponse res = new PaymentLinkResponse();
-
-        if (paymentMethod.equals(PaymentMethod.PAYOS)) {
-            PayOSPaymentResponse payOSResponse = paymentService.createPayOSPaymentLink(
-                    user, paymentOrder.getAmount(), paymentOrder.getId());
-
-            res.setPayment_link_url(payOSResponse.getData().getPaymentUrl());
-            res.setPayment_link_id(String.valueOf(payOSResponse.getData().getPaymentLinkId()));
-        }
-
-        return new ResponseEntity<>(res, HttpStatus.OK);
+    User user = userService.findUserByJwtToken(jwt);
+    Cart cart = cartService.findUserCart(user);
+    
+    if (cart.getCartItems() == null || cart.getCartItems().isEmpty()) {
+        throw new Exception("Cart is empty");
     }
+    
+    Set<Order> orders = orderService.createOrder(user, shippingAddress, cart);
+    PaymentOrder paymentOrder = paymentService.createOrder(user, orders, paymentMethod);
+    
+    PaymentLinkResponse res = new PaymentLinkResponse();
+    res.setAmount(paymentOrder.getAmount());
+    
+    // Mặc định sử dụng Stripe
+    String checkoutUrl = paymentService.createStripeCheckoutSession(user, paymentOrder.getAmount(), paymentOrder.getId());
+    res.setPayment_link_url(checkoutUrl);
+    res.setPayment_link_id(paymentOrder.getPaymentLinkId());
+
+    return new ResponseEntity<>(res, HttpStatus.OK);
+}
     @GetMapping("/user")
     public ResponseEntity<List<Order>> usersOrderHistoryHandler(
             @RequestHeader("Authorization")

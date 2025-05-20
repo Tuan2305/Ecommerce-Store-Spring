@@ -3,7 +3,6 @@ package com.tuanvn.Ecommerce.Store.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -11,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 public class PaymentLinkResponse {
     private String payment_link_url;
     private String payment_link_id;
+    private Long amount;  // Add this field
 
     public String getPayment_link_id() {
         return payment_link_id;
@@ -24,6 +24,16 @@ public class PaymentLinkResponse {
         this.payment_link_url = payment_link_url;
     }
 
-    public void setPayment_link_id(String s) {
+    public void setPayment_link_id(String paymentLinkId) {
+        this.payment_link_id = paymentLinkId;
+    }
+
+    // Add these methods
+    public Long getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Long amount) {
+        this.amount = amount;
     }
 }
