@@ -34,26 +34,39 @@ public class OrderController {
         this.paymentService = paymentService;
     }
 
-    @PostMapping()
+   @PostMapping()
 public ResponseEntity<PaymentLinkResponse> createOrderHandler(
         @RequestBody Address shippingAddress,
+        @RequestParam(name = "productIds", required = false) List<Long> productIds, // Thêm param để chỉ định sản phẩm cần đặt
         @RequestParam(name = "paymentMethod", required = false, defaultValue = "STRIPE") PaymentMethod paymentMethod,
         @RequestHeader("Authorization") String jwt) throws Exception {
 
     User user = userService.findUserByJwtToken(jwt);
     Cart cart = cartService.findUserCart(user);
     
-    if (cart.getCartItems() == null || cart.getCartItems().isEmpty()) {
-        throw new Exception("Cart is empty");
+    // Nếu không có sản phẩm nào được chỉ định, sử dụng toàn bộ giỏ hàng
+    // Nếu có productIds, chỉ tạo đơn hàng với những sản phẩm được chọn
+    Set<Order> orders;
+    if (productIds != null && !productIds.isEmpty()) {
+        // Tạo đơn hàng chỉ với các sản phẩm được chọn
+        orders = orderService.createOrderWithSelectedProducts(user, shippingAddress, cart, productIds);
+    } else {
+        if (cart.getCartItems() == null || cart.getCartItems().isEmpty()) {
+            throw new Exception("Cart is empty");
+        }
+        orders = orderService.createOrder(user, shippingAddress, cart);
     }
     
-    Set<Order> orders = orderService.createOrder(user, shippingAddress, cart);
     PaymentOrder paymentOrder = paymentService.createOrder(user, orders, paymentMethod);
     
+    // Sau khi đặt hàng thành công, xóa các sản phẩm đã đặt khỏi giỏ hàng
+    cartService.clearCartAfterOrder(user, orders);
+    
+    // Code còn lại giữ nguyên
     PaymentLinkResponse res = new PaymentLinkResponse();
     res.setAmount(paymentOrder.getAmount());
     
-    // Mặc định sử dụng Stripe
+    // Tạo session thanh toán với Stripe
     String checkoutUrl = paymentService.createStripeCheckoutSession(user, paymentOrder.getAmount(), paymentOrder.getId());
     res.setPayment_link_url(checkoutUrl);
     res.setPayment_link_id(paymentOrder.getPaymentLinkId());

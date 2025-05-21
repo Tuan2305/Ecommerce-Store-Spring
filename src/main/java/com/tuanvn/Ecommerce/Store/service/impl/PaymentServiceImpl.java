@@ -69,26 +69,40 @@ public class PaymentServiceImpl implements PaymentService {
         Stripe.apiKey = stripeConfig.getSecretKey();
     }
 
-    @Override
-    public PaymentOrder createOrder(User user, Set<Order> orders, PaymentMethod paymentMethod) {
-        System.out.println("Creating payment order...");
-        PaymentOrder paymentOrder = new PaymentOrder();
-        paymentOrder.setUser(user);
-        paymentOrder.setOrders(orders);
-        paymentOrder.setStatus(PaymentOrderStatus.PENDING);
-
-        // Calculate total amount from all orders
-        double totalAmount = 0L;
-        for (Order order : orders) {
-            totalAmount += order.getTotalPrice();
-        }
-        paymentOrder.setAmount((long) totalAmount);
-
-        // Use the provided payment method or default to STRIPE
-        paymentOrder.setPaymentMethod(paymentMethod != null ? paymentMethod : PaymentMethod.STRIPE);
-
-        return paymentOrderRepository.save(paymentOrder);
+   @Override
+public PaymentOrder createOrder(User user, Set<Order> orders, PaymentMethod paymentMethod) {
+    // Tạo mới PaymentOrder, KHÔNG dùng lại PaymentOrder cũ
+    PaymentOrder paymentOrder = new PaymentOrder();
+    paymentOrder.setUser(user);
+    
+    // Xóa tất cả các orders cũ và chỉ thêm orders hiện tại
+    // LƯU Ý: KHÔNG sử dụng paymentOrder.getOrders().addAll(orders);
+    paymentOrder.setOrders(orders); // Gán trực tiếp orders mới
+    
+    paymentOrder.setStatus(PaymentOrderStatus.PENDING);
+    
+    // Tính lại tổng tiền CHỈ từ đơn hàng hiện tại
+    double totalAmount = 0;
+    System.out.println("Tính tổng tiền cho đơn hàng mới:");
+    for (Order order : orders) {
+        System.out.println("Đơn hàng ID: " + order.getOrderId() + ", Giá: " + order.getTotalPrice());
+        totalAmount += order.getTotalPrice();
     }
+    
+    // Thêm phí vận chuyển
+    double shippingFee = 30000;
+    totalAmount += shippingFee;
+    
+    System.out.println("Tổng tiền đơn hiện tại: " + totalAmount);
+    System.out.println("- Giá sản phẩm: " + (totalAmount - shippingFee));
+    System.out.println("- Phí vận chuyển: " + shippingFee);
+    
+    paymentOrder.setAmount((long) totalAmount);
+    paymentOrder.setPaymentMethod(paymentMethod != null ? paymentMethod : PaymentMethod.STRIPE);
+    
+    // Lưu và trả về paymentOrder mới
+    return paymentOrderRepository.save(paymentOrder);
+}
 
 //    @Override
 //    public PaymentOrder createOrder(User user, Set<Order> orders) {
