@@ -34,10 +34,10 @@ public class OrderController {
         this.paymentService = paymentService;
     }
 
-   @PostMapping()
+@PostMapping()
 public ResponseEntity<PaymentLinkResponse> createOrderHandler(
         @RequestBody Address shippingAddress,
-        @RequestParam(name = "productIds", required = false) List<Long> productIds, // Thêm param để chỉ định sản phẩm cần đặt
+        @RequestParam(name = "productIds", required = false) List<Long> productIds,
         @RequestParam(name = "paymentMethod", required = false, defaultValue = "STRIPE") PaymentMethod paymentMethod,
         @RequestHeader("Authorization") String jwt) throws Exception {
 
@@ -45,10 +45,8 @@ public ResponseEntity<PaymentLinkResponse> createOrderHandler(
     Cart cart = cartService.findUserCart(user);
     
     // Nếu không có sản phẩm nào được chỉ định, sử dụng toàn bộ giỏ hàng
-    // Nếu có productIds, chỉ tạo đơn hàng với những sản phẩm được chọn
     Set<Order> orders;
     if (productIds != null && !productIds.isEmpty()) {
-        // Tạo đơn hàng chỉ với các sản phẩm được chọn
         orders = orderService.createOrderWithSelectedProducts(user, shippingAddress, cart, productIds);
     } else {
         if (cart.getCartItems() == null || cart.getCartItems().isEmpty()) {
@@ -62,9 +60,16 @@ public ResponseEntity<PaymentLinkResponse> createOrderHandler(
     // Sau khi đặt hàng thành công, xóa các sản phẩm đã đặt khỏi giỏ hàng
     cartService.clearCartAfterOrder(user, orders);
     
-    // Code còn lại giữ nguyên
+    // Lấy Order ID đầu tiên để trả về
+    Long primaryOrderId = null;
+    if (!orders.isEmpty()) {
+        primaryOrderId = orders.iterator().next().getId();
+    }
+    
     PaymentLinkResponse res = new PaymentLinkResponse();
     res.setAmount(paymentOrder.getAmount());
+    res.setOrderId(primaryOrderId); // Thêm Order ID vào response
+    res.setPaymentOrderId(paymentOrder.getId()); // ID của PaymentOrder
     
     // Tạo session thanh toán với Stripe
     String checkoutUrl = paymentService.createStripeCheckoutSession(user, paymentOrder.getAmount(), paymentOrder.getId());

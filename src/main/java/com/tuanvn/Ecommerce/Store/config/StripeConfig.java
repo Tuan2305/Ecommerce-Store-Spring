@@ -12,7 +12,7 @@ public class StripeConfig {
     @Value("${stripe.publicKey}")
     private String publicKey;
 
-    @Value("${app.baseUrl:http://localhost:8080}")
+    @Value("${app.baseUrl:http://localhost:3000}")
     private String appBaseUrl;
 
     public String getSecretKey() {
